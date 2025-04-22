@@ -1,0 +1,1 @@
+-- L'initialisation de la base sera gérée par le script Python
