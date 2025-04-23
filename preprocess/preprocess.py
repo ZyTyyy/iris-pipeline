@@ -5,7 +5,7 @@ import psycopg2
 import os
 
 # Chargement du CSV
-df = pd.read_csv("data/iris.csv")
+df = pd.read_csv("iris.csv")
 
 # Nettoyage rapide (remplacer les points dans les noms de colonnes, mettre en minuscules)
 df.columns = df.columns.str.strip().str.lower().str.replace('.', '_')

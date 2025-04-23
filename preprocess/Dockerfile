@@ -1,7 +1,9 @@
-FROM python:3.10-slim
+FROM python:3.10
 
 WORKDIR /app
-COPY preprocess.py .
-RUN pip install pandas psycopg2-binary
+
+COPY . /app/
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["python", "preprocess.py"]
