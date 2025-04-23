@@ -1,36 +1,28 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import joblib
 import numpy as np
+import mlflow.pyfunc
 
-# Chargement du modèle et de l'encodeur
-model = joblib.load("model/artifacts/random_forest_model.joblib")
-label_encoder = joblib.load("model/artifacts/label_encoder.joblib")
-
-# Création de l'app FastAPI
 app = FastAPI()
 
-# Définition du format d'entrée attendu
-class IrisInput(BaseModel):
-    sepal_length: float
+# Chargement du modèle MLflow depuis l'alias de production
+model_uri = "models:/SepalLengthPredictor@production"
+model = mlflow.pyfunc.load_model(model_uri)
+
+# Modèle de données attendu dans la requête POST
+class SepalFeatures(BaseModel):
     sepal_width: float
     petal_length: float
-    petal_length_dup: float
+    petal_width: float
 
-# Route principale
-@app.get("/")
-def read_root():
-    return {"message": "Bienvenue sur l'API de prédiction Iris 🌸"}
-
-# Route /predict
+# Route de prédiction
 @app.post("/predict")
-def predict_species(input_data: IrisInput):
-    # Créer un array numpy avec les données
-    input_array = np.array([[input_data.sepal_length, input_data.sepal_width,
-                             input_data.petal_length, input_data.petal_length_dup]])
-
-    # Prédire la classe
+def predict_sepal_length(features: SepalFeatures):
+    # Crée un tableau avec les features dans le bon ordre attendu par le modèle
+    input_array = np.array([[features.sepal_width, features.petal_length, features.petal_width]])
+    
+    # Effectue la prédiction
     prediction = model.predict(input_array)
-    species = label_encoder.inverse_transform(prediction)[0]
-
-    return {"predicted_species": species}
+    
+    # Retourne le résultat
+    return {"predicted_sepal_length": float(prediction[0])}

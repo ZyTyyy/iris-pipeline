@@ -1,17 +1,39 @@
-version: '3.8'
+version: "3.9"
 
 services:
   db:
-    image: postgres:13
+    image: postgres:15
+    container_name: postgres_db
     environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Joe13102004
       POSTGRES_DB: iris
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.2.1
+    container_name: mlflow
+    ports:
+      - "5000:5000"
+    command: mlflow ui --host 0.0.0.0
+
+  api:
+    build: ./api
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - mlflow
+    environment:
+      DB_HOST: db
+      DB_NAME: iris
+      DB_USER: postgres
+      DB_PASS: Joe13102004
+      MLFLOW_TRACKING_URI: http://mlflow:5000
 
   preprocess:
     build: ./preprocess
@@ -20,10 +42,20 @@ services:
     environment:
       DB_HOST: db
       DB_NAME: iris
-      DB_USER: user
-      DB_PASS: password
-    volumes:
-      - ./data:/data
+      DB_USER: postgres
+      DB_PASS: Joe13102004
+
+  trainer:
+    build: ./model
+    depends_on:
+      - db
+      - preprocess
+    environment:
+      DB_HOST: db
+      DB_NAME: iris
+      DB_USER: postgres
+      DB_PASS: Joe13102004
+      MLFLOW_TRACKING_URI: http://mlflow:5000
 
 volumes:
   pgdata:
