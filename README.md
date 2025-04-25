@@ -20,7 +20,7 @@ Ce projet met en place une pipeline complète de Machine Learning, de l'ingestio
 ├── api/               → FastAPI app pour exposer le modèle
 ├── model/             → Entraînement + logging MLflow
 ├── preprocess/        → Nettoyage des données + insertion PostgreSQL
-├── data/iris.csv      → Données brutes
+├── iris.csv      → Données brutes
 ├── init.sql           → Script SQL pour créer la table iris
 ├── docker-compose.yml → Orchestration des services
 └── .env               → Variables d'environnement (DB, ports)
@@ -54,11 +54,11 @@ docker-compose up --build
 
 ## 📊 Accès aux interfaces
 
-- pgAdmin : http://localhost:5050
-  - Login: admin@admin.com / admin
-  - DB: iris_db > Table: iris
-- MLflow : http://localhost:5000
-- Swagger UI : http://localhost:8000/docs
+- Swagger (FastAPI) : http://localhost:8000/docs
+
+- MLflow UI : http://localhost:5000/
+
+- PostgreSQL : localhost:5432 (user: postgres, mdp: selon .env)
 
 ---
 
@@ -82,12 +82,10 @@ Réponse :
   "prediction": 5.87
 }
 ```
+## Aperçus utiles
 
----
+- Le modèle est sauvegardé dans : model/artifacts/sepal_length_predictor.joblib
 
-## 📁 Artéfacts
+- La base de données s'appelle iris et contient une table iris
 
-- 📈 `model/artifacts/plot.png` : visualisation réelle vs prédite
-- ✅ Modèle enregistré : `SepalLengthPredictor` (MLflow Tracking)
-
----
+- Les logs MLflow se trouvent dans le dossier mlruns/
